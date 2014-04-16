@@ -1,0 +1,1 @@
+worker: java $JAVA_OPTS -jar target/AutoReply-1.0-SNAPSHOT-jar-with-dependencies.jar
