@@ -39,6 +39,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 public class RainCommand extends BaseCommand {
 
@@ -174,13 +177,14 @@ public class RainCommand extends BaseCommand {
     }
 
     public InputStream graphRain(List<Double> rainList) throws IOException {
-        DefaultCategoryDataset data = new DefaultCategoryDataset();
+        XYSeries series = new XYSeries("rainfalll");
+        XYSeriesCollection data = new XYSeriesCollection(series);
 
         for (int i = 0; i < rainList.size(); i++) {
-            data.addValue(rainList.get(i), "", Integer.toString(i * 0));
+            series.add(i * 10, rainList.get(i));
         }
 
-        JFreeChart chart = ChartFactory.createLineChart("降雨予測", "分後", "降雨量 mm/h", data, PlotOrientation.VERTICAL, true, false, false);
+        JFreeChart chart = ChartFactory.createXYLineChart("Rain forecast", "minutes later", "rainfall mm/h", data, PlotOrientation.VERTICAL, false, false, false);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(chart.createBufferedImage(512, 512), "png", baos);
