@@ -1,5 +1,8 @@
 package net.ja731j.twitter.autoreply.command;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -11,6 +14,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import javax.imageio.ImageIO;
 import net.ja731j.twitter.autoreply.MyStreamAdapter;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
@@ -30,6 +34,11 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 public class RainCommand extends BaseCommand {
 
@@ -56,18 +65,21 @@ public class RainCommand extends BaseCommand {
             String text = status.getText();
             String loc = removePattern.matcher(text).replaceFirst("");
             String result = "@" + status.getUser().getScreenName() + " ";
+            StatusUpdate update;
 
             Map<String, String> target = getCoord(loc);
             if (target.isEmpty()) {
-                result = result.concat("場所を見つけられませんでした。");
+                update = new StatusUpdate(result.concat("場所を見つけられませんでした。"));
             } else {
                 String targetName = target.get("name");
                 String targetCoord = target.get("coord");
+                List<Double> rain = getRain(targetCoord);
 
-                result = result.concat(targetName + "における降雨アドバイス\n").concat(getAdviceText(decide(getRain(targetCoord))));
+                update = new StatusUpdate(result.concat(targetName + "における降雨アドバイス\n").concat(getAdviceText(decide(rain))));
+                update.media("降雨予測", graphRain(rain));
             }
 
-            StatusUpdate update = new StatusUpdate(result).inReplyToStatusId(status.getId());
+            update.inReplyToStatusId(status.getId());
             twitter.updateStatus(update);
 
         } catch (TwitterException ex) {
@@ -159,6 +171,22 @@ public class RainCommand extends BaseCommand {
             }
         }
         return result;
+    }
+
+    public InputStream graphRain(List<Double> rainList) throws IOException {
+        DefaultCategoryDataset data = new DefaultCategoryDataset();
+
+        for (int i = 0; i < rainList.size(); i++) {
+            data.addValue(rainList.get(i), "", Integer.toString(i * 0));
+        }
+
+        JFreeChart chart = ChartFactory.createLineChart("降雨予測", "分後", "降雨量 mm/h", data, PlotOrientation.VERTICAL, true, false, false);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(chart.createBufferedImage(512, 512), "png", baos);
+        InputStream is = new ByteArrayInputStream(baos.toByteArray());
+
+        return is;
     }
 
     private enum Decision {
