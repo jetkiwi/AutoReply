@@ -1,26 +1,27 @@
 package net.ja731j.twitter.autoreply.command;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import net.ja731j.twitter.autoreply.MyStreamAdapter;
-import net.ja731j.twitter.autoreply.Util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
-import twitter4j.TwitterException;
 import twitter4j.UserMentionEntity;
 
 public class FoodCommand extends BaseCommand {
 
     private final Pattern commandPattern = Pattern.compile("^@ja731j coop_food$");
+    private final Pattern englishPattern = Pattern.compile("[（(][\\p{Alnum},.' （()）]+[)）]");
 
     @Override
     public boolean verifySyntax(Status status) {
@@ -39,38 +40,39 @@ public class FoodCommand extends BaseCommand {
         try {
             String result = "@" + status.getUser().getScreenName() + " おすすめメニュー情報です。\n\n";
 
-            Document doc = Jsoup.connect("http://gakushoku.coop/setmenu.php?feeling=C&price=500").get();
-
-            Element list = doc.getElementById("setList");
-            Elements items = list.children();
-            for (Element item : items) {
-                if (item.tag() == Tag.valueOf("li")) {
-                    //Get name
-                    Elements e = item.getElementsByAttribute("alt");
-                    String name;
-                    if (e.size() == 2) {
-                        name = e.get(0).attr("alt");
-                    } else if (e.size() == 3) {
-                        name = e.get(1).attr("alt");
-                    } else {
-                        name = "Error while fetching name";
-                    }
-
-                    //Get price
-                    String price = item.getElementsByClass("tt-prices").get(0).text();
-
-                    result = result.concat(name + " (" + price + ")\n");
-                }
+            List<Map.Entry<String, Integer>> items = fetchMenu();
+            int total = 0;
+            for (Map.Entry<String, Integer> item : items) {
+                result = result.concat(String.format("%s(%d円)\n", item.getKey(), item.getValue()));
+                total += item.getValue();
             }
-            result = result.concat(doc.getElementById("set-total-value").getElementsByTag("span").get(0).text().replace("\u00a0", ""));
-
+            result = result.concat(String.format("合計%d円", total));
             return new StatusUpdate(result).inReplyToStatusId(status.getId());
-            
+
         } catch (IOException ex) {
             Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return createReply(status,"エラーが発生しました。");
+
+        return createReply(status, "エラーが発生しました。");
+    }
+
+    protected List<Map.Entry<String, Integer>> fetchMenu() throws IOException {
+        List<Map.Entry<String, Integer>> result = new ArrayList<>();
+        Document doc = Jsoup.connect("http://gakushoku.coop/setmenu.php?feeling=C&price=500").get();
+
+        Element list = doc.getElementById("setList");
+        //Get name and price for each item
+        for (Element item : list.select(":root > li")) {
+            System.out.println(item.html());
+            //Get name
+            Elements e = item.getElementsByClass("menuphoto").first().getElementsByAttribute("alt");
+            String name = englishPattern.matcher(e.last().attr("alt")).replaceAll("");
+            //Get price
+            int price = Integer.parseInt(item.getElementsByClass("tt-prices").first().text().replace("円", ""));
+            result.add(new AbstractMap.SimpleEntry<>(name, price));
+        }
+
+        return result;
     }
 
 }
