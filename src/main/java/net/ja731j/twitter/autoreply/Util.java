@@ -1,11 +1,6 @@
 package net.ja731j.twitter.autoreply;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import twitter4j.Status;
-import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
-import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
@@ -31,13 +26,5 @@ public class Util {
         }
         return twitter;
     }
-
-    private static void sendReply(Status status, String text) {
-        StatusUpdate update = new StatusUpdate("@" + status.getUser().getScreenName() + " " + text).inReplyToStatusId(status.getId());
-        try {
-            getTwitter().updateStatus(update);
-        } catch (TwitterException ex) {
-            Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    
 }
