@@ -1,1 +1,1 @@
-worker: java $JAVA_OPTS -jar target/AutoReply-1.0-SNAPSHOT-jar-with-dependencies.jar
+worker: java $JAVA_OPTS -cp target/classes:target/dependency/* net.ja731j.twitter.autoreply.App
