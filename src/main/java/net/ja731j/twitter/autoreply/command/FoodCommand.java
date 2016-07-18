@@ -63,7 +63,6 @@ public class FoodCommand extends BaseCommand {
         Element list = doc.getElementById("setList");
         //Get name and price for each item
         for (Element item : list.select(":root > li")) {
-            System.out.println(item.html());
             //Get name
             Elements e = item.getElementsByClass("menuphoto").first().getElementsByAttribute("alt");
             String name = englishPattern.matcher(e.last().attr("alt")).replaceAll("");
