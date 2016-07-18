@@ -21,6 +21,7 @@ import twitter4j.UserMentionEntity;
 public class FoodCommand extends BaseCommand {
 
     private final Pattern commandPattern = Pattern.compile("^@ja731j coop_food$");
+    private final Pattern englishPattern = Pattern.compile("[（(][\\p{Alnum},.' （()）]+[)）]");
 
     @Override
     public boolean verifySyntax(Status status) {
@@ -42,26 +43,16 @@ public class FoodCommand extends BaseCommand {
             Document doc = Jsoup.connect("http://gakushoku.coop/setmenu.php?feeling=C&price=500").get();
 
             Element list = doc.getElementById("setList");
-            Elements items = list.children();
-            for (Element item : items) {
-                if (item.tag() == Tag.valueOf("li")) {
-                    //Get name
-                    Elements e = item.getElementsByAttribute("alt");
-                    String name;
-                    if (e.size() == 2) {
-                        name = e.get(0).attr("alt");
-                    } else if (e.size() == 3) {
-                        name = e.get(1).attr("alt");
-                    } else {
-                        name = "Error while fetching name";
-                    }
-
-                    //Get price
-                    String price = item.getElementsByClass("tt-prices").get(0).text();
-
-                    result = result.concat(name + " (" + price + ")\n");
-                }
+            //Get name and price for each item
+            for (Element item : list.getElementsByTag("li")) {
+                //Get name
+                Elements e = item.getElementsByClass("menuphoto").first().getElementsByAttribute("alt");
+                String name = e.first().attr("alt");
+                //Get price
+                String price = item.getElementsByClass("tt-prices").get(0).text();
+                result = result.concat(name + " (" + price + ")\n");
             }
+            //Append the total price at the bottom
             result = result.concat(doc.getElementById("set-total-value").getElementsByTag("span").get(0).text().replace("\u00a0", ""));
 
             return new StatusUpdate(result).inReplyToStatusId(status.getId());
