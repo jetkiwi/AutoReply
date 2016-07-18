@@ -29,19 +29,19 @@ public class UpdateNameCommand extends BaseCommand{
     }
 
     @Override
-    public void execute(Status status) {
+    public StatusUpdate execute(Status status) {
         try {
             String text = status.getText();
             String result = removePattern.matcher(text).replaceFirst("");
             User user = twitter.verifyCredentials();
             
             twitter.updateProfile(result, user.getURL(), user.getLocation(), user.getDescription());
-            StatusUpdate update = new StatusUpdate(status.getUser().getName() + "(" +"@" + status.getUser().getScreenName()+ ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
-            twitter.updateStatus(update);
+            return new StatusUpdate(status.getUser().getName() + "(" +"@" + status.getUser().getScreenName()+ ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
 
         } catch (TwitterException ex) {
             Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return createReply(status, "エラーが発生しました。");
     }
     
 }

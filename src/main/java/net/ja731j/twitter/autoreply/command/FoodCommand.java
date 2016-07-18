@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import net.ja731j.twitter.autoreply.MyStreamAdapter;
+import net.ja731j.twitter.autoreply.Util;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,7 +35,7 @@ public class FoodCommand extends BaseCommand {
     }
 
     @Override
-    public void execute(Status status) {
+    public StatusUpdate execute(Status status) {
         try {
             String result = "@" + status.getUser().getScreenName() + " おすすめメニュー情報です。\n\n";
 
@@ -63,13 +64,13 @@ public class FoodCommand extends BaseCommand {
             }
             result = result.concat(doc.getElementById("set-total-value").getElementsByTag("span").get(0).text().replace("\u00a0", ""));
 
-            StatusUpdate update = new StatusUpdate(result).inReplyToStatusId(status.getId());
-            twitter.updateStatus(update);
-        } catch (TwitterException ex) {
-            Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            return new StatusUpdate(result).inReplyToStatusId(status.getId());
+            
         } catch (IOException ex) {
             Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return createReply(status,"エラーが発生しました。");
     }
 
 }

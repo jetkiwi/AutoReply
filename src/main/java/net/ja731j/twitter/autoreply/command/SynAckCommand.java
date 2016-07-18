@@ -30,7 +30,7 @@ public class SynAckCommand extends BaseCommand {
     }
 
     @Override
-    public void execute(Status status) {
+    public StatusUpdate execute(Status status) {
         Matcher m = synSynbolPattern.matcher(status.getText());
         String ack = new String();
         while (m.find()) {
@@ -38,11 +38,7 @@ public class SynAckCommand extends BaseCommand {
         }
 
         StatusUpdate update = new StatusUpdate("@" + status.getUser().getScreenName() + " " + ack).inReplyToStatusId(status.getId());
-        try {
-            twitter.updateStatus(update);
-        } catch (TwitterException ex) {
-            Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return update;
     }
 
 }

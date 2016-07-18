@@ -29,7 +29,7 @@ public class UpdateName2Command extends BaseCommand{
     }
 
     @Override
-    public void execute(Status status) {
+    public StatusUpdate execute(Status status) {
         try {
             String text = status.getText();
             String result = removePattern.matcher(text).replaceFirst("");
@@ -37,11 +37,12 @@ public class UpdateName2Command extends BaseCommand{
             
             twitter.updateProfile(result, user.getURL(), user.getLocation(), user.getDescription());
             StatusUpdate update = new StatusUpdate(status.getUser().getName() + "(" +"@" + status.getUser().getScreenName()+ ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
-            twitter.updateStatus(update);
+            return update;
 
         } catch (TwitterException ex) {
             Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return createReply(status, "エラーが発生しました。");
     }
     
 }

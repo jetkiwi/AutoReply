@@ -63,7 +63,7 @@ public class RainCommand extends BaseCommand {
     }
 
     @Override
-    public void execute(Status status) {
+    public StatusUpdate execute(Status status) {
         try {
             String text = status.getText();
             String loc = removePattern.matcher(text).replaceFirst("");
@@ -83,10 +83,8 @@ public class RainCommand extends BaseCommand {
             }
 
             update.inReplyToStatusId(status.getId());
-            twitter.updateStatus(update);
+            return update;
 
-        } catch (TwitterException ex) {
-            Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
             Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
         } catch (HttpResponseException ex) {
@@ -95,6 +93,7 @@ public class RainCommand extends BaseCommand {
         } catch (IOException ex) {
             Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return createReply(status, "エラーが発生しました。");
     }
 
     private Map<String, String> getCoord(String str) throws URISyntaxException, IOException, HttpResponseException {
