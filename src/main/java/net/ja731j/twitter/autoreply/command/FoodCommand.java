@@ -47,7 +47,7 @@ public class FoodCommand extends BaseCommand {
             for (Element item : list.getElementsByTag("li")) {
                 //Get name
                 Elements e = item.getElementsByClass("menuphoto").first().getElementsByAttribute("alt");
-                String name = e.first().attr("alt");
+                String name = englishPattern.matcher(e.first().attr("alt")).replaceAll("");
                 //Get price
                 String price = item.getElementsByClass("tt-prices").get(0).text();
                 result = result.concat(name + " (" + price + ")\n");
