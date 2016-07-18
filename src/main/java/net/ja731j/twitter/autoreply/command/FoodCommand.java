@@ -21,7 +21,7 @@ import twitter4j.UserMentionEntity;
 public class FoodCommand extends BaseCommand {
 
     private final Pattern commandPattern = Pattern.compile("^@ja731j coop_food$");
-    private final Pattern englishPattern = Pattern.compile("[（(][\\p{Alnum},.' （()）]+[)）]");
+    private final Pattern englishPattern = Pattern.compile("[（(][\\p{Alnum}\\p{Space},.'-　（()）]+[)）]");
 
     @Override
     public boolean verifySyntax(Status status) {
