@@ -12,16 +12,27 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.UserMentionEntity;
 
-public class UpdateNameCommand extends BaseCommand{
-    private final Pattern updatePattern = Pattern.compile("^@ja731j update_name .{1,20}$");
-    private final Pattern removePattern = Pattern.compile("@ja731j update_name ");
+public class UpdateNameCommand extends BaseCommand {
+
+    private Pattern updatePattern;
+    private Pattern removePattern;
+
+    public UpdateNameCommand(MyStreamAdapter manager) {
+        super(manager);
+    }
+
+    @Override
+    public void updateSyntax() {
+        updatePattern = Pattern.compile(String.format("^@%s update_name .{1,20}$",manager.getScreenName()));
+        removePattern = Pattern.compile(String.format("@%s update_name ",manager.getScreenName()));
+    }
 
     @Override
     public boolean verifySyntax(Status status) {
         boolean result = false;
-        ArrayList<UserMentionEntity> mentionList = new ArrayList<UserMentionEntity>(Arrays.asList(status.getUserMentionEntities()));
+        ArrayList<UserMentionEntity> mentionList = new ArrayList<>(Arrays.asList(status.getUserMentionEntities()));
         for (UserMentionEntity e : mentionList) {
-            if (e.getScreenName().equalsIgnoreCase("ja731j")) {
+            if (e.getId() == manager.getUserId()) {
                 result = updatePattern.matcher(status.getText()).matches();
             }
         }
@@ -34,14 +45,14 @@ public class UpdateNameCommand extends BaseCommand{
             String text = status.getText();
             String result = removePattern.matcher(text).replaceFirst("");
             User user = twitter.verifyCredentials();
-            
+
             twitter.updateProfile(result, user.getURL(), user.getLocation(), user.getDescription());
-            return new StatusUpdate(status.getUser().getName() + "(" +"@" + status.getUser().getScreenName()+ ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
+            return new StatusUpdate(status.getUser().getName() + "(" + "@" + status.getUser().getScreenName() + ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
 
         } catch (TwitterException ex) {
             Logger.getLogger(MyStreamAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
         return createReply(status, "エラーが発生しました。");
     }
-    
+
 }

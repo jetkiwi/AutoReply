@@ -20,15 +20,24 @@ import twitter4j.UserMentionEntity;
 
 public class FoodCommand extends BaseCommand {
 
-    private final Pattern commandPattern = Pattern.compile("^@ja731j coop_food$");
+    private Pattern commandPattern;
     private final Pattern englishPattern = Pattern.compile("[（(][\\p{Alnum}\\p{Space},.'-　（()）]+[)）]");
+
+    public FoodCommand(MyStreamAdapter manager) {
+        super(manager);
+    }
+
+    @Override
+    public void updateSyntax() {
+        commandPattern = Pattern.compile(String.format("^@%s coop_food$", manager.getScreenName()));
+    }
 
     @Override
     public boolean verifySyntax(Status status) {
         boolean result = false;
         ArrayList<UserMentionEntity> mentionList = new ArrayList<>(Arrays.asList(status.getUserMentionEntities()));
         for (UserMentionEntity e : mentionList) {
-            if (e.getScreenName().equalsIgnoreCase("ja731j")) {
+            if (e.getId() == manager.getUserId()) {
                 result = commandPattern.matcher(status.getText()).matches();
             }
         }

@@ -12,16 +12,27 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 import twitter4j.UserMentionEntity;
 
-public class UpdateName2Command extends BaseCommand{
-    private final Pattern updatePattern = Pattern.compile("^.{1,20}\\(@ja731j\\)$");
-    private final Pattern removePattern = Pattern.compile("\\(@ja731j\\)");
+public class UpdateName2Command extends BaseCommand {
+
+    private Pattern updatePattern;
+    private Pattern removePattern;
+
+    public UpdateName2Command(MyStreamAdapter manager) {
+        super(manager);
+    }
+
+    @Override
+    public void updateSyntax() {
+        updatePattern = Pattern.compile(String.format("^.{1,20}\\(@%s\\)$",manager.getScreenName()));
+        removePattern = Pattern.compile(String.format("\\(@%s\\)",manager.getScreenName()));
+    }
 
     @Override
     public boolean verifySyntax(Status status) {
         boolean result = false;
         ArrayList<UserMentionEntity> mentionList = new ArrayList<>(Arrays.asList(status.getUserMentionEntities()));
         for (UserMentionEntity e : mentionList) {
-            if (e.getScreenName().equalsIgnoreCase("ja731j")) {
+            if (e.getId() == manager.getUserId()) {
                 result = updatePattern.matcher(status.getText()).matches();
             }
         }
@@ -34,9 +45,9 @@ public class UpdateName2Command extends BaseCommand{
             String text = status.getText();
             String result = removePattern.matcher(text).replaceFirst("");
             User user = twitter.verifyCredentials();
-            
+
             twitter.updateProfile(result, user.getURL(), user.getLocation(), user.getDescription());
-            StatusUpdate update = new StatusUpdate(status.getUser().getName() + "(" +"@" + status.getUser().getScreenName()+ ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
+            StatusUpdate update = new StatusUpdate(status.getUser().getName() + "(" + "@" + status.getUser().getScreenName() + ")" + "様のご意思により" + result + "に改名しました。").inReplyToStatusId(status.getId());
             return update;
 
         } catch (TwitterException ex) {
@@ -44,5 +55,5 @@ public class UpdateName2Command extends BaseCommand{
         }
         return createReply(status, "エラーが発生しました。");
     }
-    
+
 }

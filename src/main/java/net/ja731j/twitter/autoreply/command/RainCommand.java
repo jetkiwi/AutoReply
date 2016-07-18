@@ -31,6 +31,7 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import net.ja731j.twitter.autoreply.MyStreamAdapter;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -41,15 +42,25 @@ public class RainCommand extends BaseCommand {
 
     private final String appId = System.getenv("YahooAppId");
 
-    private final Pattern updatePattern = Pattern.compile("^@ja731j rain .{1,30}$");
-    private final Pattern removePattern = Pattern.compile("@ja731j rain ");
+    private Pattern updatePattern;
+    private Pattern removePattern;
+
+    public RainCommand(MyStreamAdapter manager) {
+        super(manager);
+    }
+
+    @Override
+    public void updateSyntax() {
+        updatePattern = Pattern.compile(String.format("^@%s rain .{1,30}$", manager.getScreenName()));
+        removePattern = Pattern.compile(String.format("@%s rain ", manager.getScreenName()));
+    }
 
     @Override
     public boolean verifySyntax(Status status) {
         boolean result = false;
         ArrayList<UserMentionEntity> mentionList = new ArrayList<>(Arrays.asList(status.getUserMentionEntities()));
         for (UserMentionEntity e : mentionList) {
-            if (e.getScreenName().equalsIgnoreCase("ja731j")) {
+            if (e.getId() == manager.getUserId()) {
                 result = updatePattern.matcher(status.getText()).matches();
             }
         }
@@ -78,7 +89,7 @@ public class RainCommand extends BaseCommand {
 
             update.inReplyToStatusId(status.getId());
             return update;
-            
+
         } catch (HttpResponseException ex) {
             Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException | IOException ex) {
