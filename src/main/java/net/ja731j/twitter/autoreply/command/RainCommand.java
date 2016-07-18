@@ -84,13 +84,10 @@ public class RainCommand extends BaseCommand {
 
             update.inReplyToStatusId(status.getId());
             return update;
-
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
+            
         } catch (HttpResponseException ex) {
-            System.err.println("oops");
             Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (URISyntaxException | IOException ex) {
             Logger.getLogger(RainCommand.class.getName()).log(Level.SEVERE, null, ex);
         }
         return createReply(status, "エラーが発生しました。");

@@ -19,7 +19,7 @@ public class UpdateName2Command extends BaseCommand{
     @Override
     public boolean verifySyntax(Status status) {
         boolean result = false;
-        ArrayList<UserMentionEntity> mentionList = new ArrayList<UserMentionEntity>(Arrays.asList(status.getUserMentionEntities()));
+        ArrayList<UserMentionEntity> mentionList = new ArrayList<>(Arrays.asList(status.getUserMentionEntities()));
         for (UserMentionEntity e : mentionList) {
             if (e.getScreenName().equalsIgnoreCase("ja731j")) {
                 result = updatePattern.matcher(status.getText()).matches();

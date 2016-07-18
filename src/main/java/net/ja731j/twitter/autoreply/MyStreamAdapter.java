@@ -19,7 +19,7 @@ import twitter4j.UserStreamAdapter;
 
 public class MyStreamAdapter extends UserStreamAdapter {
 
-    ArrayList<BaseCommand> commands = new ArrayList<BaseCommand>();
+    ArrayList<BaseCommand> commands = new ArrayList<>();
 
     MyStreamAdapter(){
         super();
