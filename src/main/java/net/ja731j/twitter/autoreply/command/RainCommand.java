@@ -1,6 +1,5 @@
 package net.ja731j.twitter.autoreply.command;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,10 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
-import net.ja731j.twitter.autoreply.MyStreamAdapter;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
-import twitter4j.TwitterException;
 import twitter4j.UserMentionEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -37,9 +34,6 @@ import javax.json.JsonValue.ValueType;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
