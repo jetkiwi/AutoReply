@@ -1,1 +1,1 @@
-worker: java $JAVA_OPTS -cp target/classes:target/dependency/* App
+worker: java $JAVA_OPTS -cp target/classes:target/dependency/* net.ja731j.twitter.autoreply.App
